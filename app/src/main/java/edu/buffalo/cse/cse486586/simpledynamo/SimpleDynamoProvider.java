@@ -48,8 +48,9 @@ public class SimpleDynamoProvider extends ContentProvider {
     Boolean waitFlag=false;
     Boolean queryWaitFlag=false;
     Boolean deleteWaitFlag=false;
-    Boolean deleteStarWaitFlag=false;
+    Boolean starDeleteWaitFlag=false;
     Boolean starQueryWaitFlag=false;
+    List<String> deleteList=null;
     List<String> acknList=null;
     List<String> starQueryList=null;
     public static Map<String,String> ringMap=new TreeMap<String,String>();
@@ -85,6 +86,15 @@ public class SimpleDynamoProvider extends ContentProvider {
             return 1;
         }
         else if(selectionQuery.equals("*")){
+            starDeleteWaitFlag=true;
+            deleteList=new ArrayList<String>();
+            for (String str : portNumbers) {
+                new ClientTask().executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, String.valueOf(Mode.DELETESTAR),str);
+            }
+            Log.d(TAG,"starDeleteWaitFlag before waiting"+String.valueOf(starDeleteWaitFlag));
+            while (starDeleteWaitFlag);
+            Log.d(TAG,"starDeleteWaitFlag after waiting"+String.valueOf(starDeleteWaitFlag));
+            Log.d(TAG,"Delete Successful");
                 //send everyone @ parameter for delete
         }
         return 0;
@@ -389,7 +399,9 @@ public class SimpleDynamoProvider extends ContentProvider {
             for (String str : portNumbers) {
                 new ClientTask().executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, String.valueOf(Mode.STARQUERY),str);
             }
+            Log.d(TAG,"starQueryWaitFlag before waiting"+String.valueOf(starQueryWaitFlag));
             while(starQueryWaitFlag);
+            Log.d(TAG,"starQueryWaitFlag after waiting"+String.valueOf(starQueryWaitFlag));
             matrixCursor = new MatrixCursor(new String[]{"key", "value"});
             for(String key:keyValueMap.keySet()){
                 matrixCursor.newRow().add(key).add(keyValueMap.get(key));
@@ -504,6 +516,13 @@ public class SimpleDynamoProvider extends ContentProvider {
                                 ps = new PrintStream
                                         (client.getOutputStream());
                                 ps.println("recordDeleted");
+                                ps.flush();
+                            case DELETESTAR:
+                                Log.d(TAG, "Inside DELETESTARMODE in server");
+                                deleteAll();
+                                ps = new PrintStream
+                                        (client.getOutputStream());
+                                ps.println("DeletedAll");
                                 ps.flush();
                         }
                     } catch (Exception e) {
@@ -699,6 +718,31 @@ public class SimpleDynamoProvider extends ContentProvider {
                             String msg=in.readLine();
                             if(msg.equals("recordDeleted")){
                                 deleteWaitFlag=false;
+                            }
+                        }
+                    }
+                    catch (IOException e){
+                        e.printStackTrace();
+                    }
+                case DELETESTAR:
+                    Log.d(TAG, "Inside DELETESTARMODE in client");
+                    String starholderPortDelete=msgs[1];
+                    String starholderPortDeleteNumber = String.valueOf((Integer.parseInt(starholderPortDelete) * 2));
+                    try{
+                        Socket socket = new Socket(InetAddress.getByAddress(new byte[]{10, 0, 2, 2}), Integer.parseInt(starholderPortDeleteNumber));
+                        if (socket.isConnected()) {
+                            PrintStream ps = new PrintStream
+                                    (socket.getOutputStream());
+                            ps.println(String.valueOf(Mode.DELETESTAR));
+                            ps.flush();
+                            in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+                            String msg=in.readLine();
+                            if(msg.equals("DeletedAll")){
+                                deleteList.add("All keys deleted for"+starholderPortDelete);
+                                if(deleteList.size()==5){
+                                    deleteWaitFlag=false;
+                                }
+
                             }
                         }
                     }
