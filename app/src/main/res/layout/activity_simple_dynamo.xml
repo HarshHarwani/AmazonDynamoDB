@@ -20,4 +20,19 @@
         android:maxLines="13"
         android:textIsSelectable="true"
         android:scrollbars="vertical" />
+    <Button
+        android:id="@+id/Ldump"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentStart="true"
+        android:text="Ldump" />
+
+    <Button
+        android:id="@+id/Test"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentEnd="true"
+        android:text="test" />
 </RelativeLayout>
