@@ -50,9 +50,12 @@ public class SimpleDynamoProvider extends ContentProvider {
     Boolean deleteWaitFlag=false;
     Boolean starDeleteWaitFlag=false;
     Boolean starQueryWaitFlag=false;
+    List<String> deleteStarList=null;
     List<String> deleteList=null;
     List<String> acknList=null;
     List<String> starQueryList=null;
+    public static Map<String,Boolean> waitMap=new HashMap<String,Boolean>();
+   // public static Map<String,Boolean> insertWaitMap=new HashMap<String,Boolean>();
     public static Map<String,String> ringMap=new TreeMap<String,String>();
     public Map<String,String> keyValueMap=null;
     //buildUri method for content provider
@@ -67,19 +70,30 @@ public class SimpleDynamoProvider extends ContentProvider {
     @Override
     public int delete(Uri uri, String selection, String[] selectionArgs) {
         String holderPort=null;
+        String[] successors = null;
+        String succesor1Port = null;
+        String succesor2Port = null;
         String selectionQuery = selection.replaceAll("\"", "");
         if (selectionQuery.equals("@")) {
             deleteAll();
             return 1;
         } else if ((!selectionQuery.equals("@") && !selectionQuery.equals("*"))) {
+            deleteList=new ArrayList<String>();
             deleteWaitFlag=true;
             for (String str : portNumbers) {
-                boolean flag = containsRequest(selectionQuery, str);
+                String incomingPredecessor=getPredecessor(str);
+                boolean flag = containsRequest(selectionQuery, str,incomingPredecessor);
                 if (flag) {
                     holderPort=str;
                 }
             }
+            successors = getSuccessors(holderPort);
+            succesor1Port = successors[0];
+            succesor2Port = successors[1];
+            Log.d(TAG,"Successors of the holder in delete are-->"+succesor1Port+","+succesor2Port);
             new ClientTask().executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, String.valueOf(Mode.DELETE),holderPort,selectionQuery);
+            new ClientTask().executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, String.valueOf(Mode.DELETE),succesor1Port,selectionQuery);
+            new ClientTask().executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, String.valueOf(Mode.DELETE),succesor2Port,selectionQuery);
             Log.d(TAG,"value of deleteWaitFlag before waiting"+deleteWaitFlag);
             while (deleteWaitFlag);
             Log.d(TAG,"value of deleteWaitFlag after waiting"+deleteWaitFlag);
@@ -87,7 +101,7 @@ public class SimpleDynamoProvider extends ContentProvider {
         }
         else if(selectionQuery.equals("*")){
             starDeleteWaitFlag=true;
-            deleteList=new ArrayList<String>();
+            deleteStarList=new ArrayList<String>();
             for (String str : portNumbers) {
                 new ClientTask().executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, String.valueOf(Mode.DELETESTAR),str);
             }
@@ -95,7 +109,7 @@ public class SimpleDynamoProvider extends ContentProvider {
             while (starDeleteWaitFlag);
             Log.d(TAG,"starDeleteWaitFlag after waiting"+String.valueOf(starDeleteWaitFlag));
             Log.d(TAG,"Delete Successful");
-                //send everyone @ parameter for delete
+            //send everyone @ parameter for delete
         }
         return 0;
 
@@ -134,7 +148,7 @@ public class SimpleDynamoProvider extends ContentProvider {
     @Override
     public Uri insert(Uri uri, ContentValues values) {
         // TODO Auto-generated method stub
-        waitFlag=true;
+       // waitFlag=true;
         acknList=new ArrayList<String>();
         String key = (String) values.get("key");
         String value = (String) values.get("value");
@@ -146,20 +160,23 @@ public class SimpleDynamoProvider extends ContentProvider {
         String succesor2Port = null;
         try {
             for (String str : portNumbers) {
-                boolean flag = containsRequest(key, str);
+                String incomingPredecessor=getPredecessor(str);
+                boolean flag = containsRequest(key, str,incomingPredecessor);
                 if (flag) {
                     holderPort = str;
-                    successors = getSuccessors(holderPort);
+                    Log.d(TAG,"Key belongs to-->"+holderPort);
                     break;
                 }
-                succesor1Port = successors[0];
-                succesor2Port = successors[1];
             }
+            successors = getSuccessors(holderPort);
+            succesor1Port = successors[0];
+            succesor2Port = successors[1];
+            Log.d(TAG,"Successors of the holder are-->"+succesor1Port+","+succesor2Port);
             new ClientTask().executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, String.valueOf(Mode.HOLDERINSERTMODE),holderPort,key,value);
             new ClientTask().executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, String.valueOf(Mode.SUCCESSOR1MODE),succesor1Port,key,value);
             new ClientTask().executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, String.valueOf(Mode.SUCCESSOR2MODE),succesor2Port,key,value);
             Log.d(TAG,"WaitFlag before waiting"+String.valueOf(waitFlag));
-            while(waitFlag);
+            while(acknList.size()!=3);
             Log.d(TAG,"WaitFlag after waiting"+String.valueOf(waitFlag));
             Log.d(TAG,"Insert Successful");
 
@@ -222,27 +239,29 @@ public class SimpleDynamoProvider extends ContentProvider {
         }
         return false;
     }
-    public String queryRecord(String key)
+    public String queryRecord(String incomingKey)
     {
-        FileInputStream inputStream = null;
-        MatrixCursor matrixCursor = null;
-        BufferedReader bufferedReader = null;
-        InputStreamReader inputStreamReader = null;
-        try {
-            inputStream = getContext().openFileInput(key);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
+
+            FileInputStream inputStream = null;
+            MatrixCursor matrixCursor = null;
+            BufferedReader bufferedReader = null;
+            InputStreamReader inputStreamReader = null;
+            try {
+                inputStream = getContext().openFileInput(incomingKey);
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
+            inputStreamReader = new InputStreamReader(inputStream);
+            bufferedReader = new BufferedReader(inputStreamReader);
+            String value = null;
+            try {
+                value = bufferedReader.readLine();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return incomingKey + "%" + value;
         }
-        inputStreamReader = new InputStreamReader(inputStream);
-        bufferedReader = new BufferedReader(inputStreamReader);
-        String value = null;
-        try {
-            value = bufferedReader.readLine();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return key+"%"+value;
-    }
+
 
     public void insertQueryStringIntoMap(String queryString){
         if(queryString!=null && queryString!="") {
@@ -283,15 +302,15 @@ public class SimpleDynamoProvider extends ContentProvider {
         return query;
     }
 
-    public boolean containsRequest(String query, String portNo) {
+    public boolean containsRequest(String query, String portNo,String incomingPredecessor) {
         boolean flag = false;
         try {
-            Log.d("Inside contains Request", "Query-->" + query + " " + "Predecessor->=" + predecessor + " " + "client->" + portNo + " " + "Successor->" + predecessor);
-            if (genHash(predecessor).compareTo(genHash(portNo)) > 0 && (((genHash(query).compareTo(genHash(portNo)) < 0) || (genHash(query).compareTo(genHash(predecessor)) > 0))))
+            Log.d("Inside contains Request", "Query-->" + query + " " + "Predecessor->=" + incomingPredecessor + " " + "client->" + portNo);
+            if (genHash(incomingPredecessor).compareTo(genHash(portNo)) > 0 && (((genHash(query).compareTo(genHash(portNo)) < 0) || (genHash(query).compareTo(genHash(incomingPredecessor)) > 0))))
                 flag = true;
-            else if (genHash(query).compareTo(genHash(predecessor)) > 0 && genHash(query).compareTo(genHash(portNo)) <= 0)
+            else if (genHash(query).compareTo(genHash(incomingPredecessor)) > 0 && genHash(query).compareTo(genHash(portNo)) <= 0)
                 flag = true;
-            else if (predecessor.equals(portNo) && portNo.equals(predecessor))
+            else if (incomingPredecessor.equals(portNo) && portNo.equals(incomingPredecessor))
                 flag = true;
             else
                 flag = false;
@@ -350,64 +369,78 @@ public class SimpleDynamoProvider extends ContentProvider {
         Log.d("selection",selection);
         String selectionQuery= selection.replaceAll("\"","");
         Log.d("selectionQuery",selectionQuery);
-        if((!selectionQuery.equals("@") && !selectionQuery.equals("*"))){
-            for (String str : portNumbers) {
-            boolean flag = containsRequest(selectionQuery, str);
-            if (flag) {
-                queryHolderPort = str;
-                Log.d(TAG,"The port where key belongs is"+queryHolderPort);
-                break;
-            }
-        }
-            new ClientTask().executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, String.valueOf(Mode.QUERY),queryHolderPort,selectionQuery);
-            queryWaitFlag=true;
-            Log.d(TAG,"queryWaitFlag before waiting"+String.valueOf(queryWaitFlag));
-            while(queryWaitFlag);
-            Log.d(TAG,"queryWaitFlag after waiting"+String.valueOf(queryWaitFlag));
-            String key=finalFetchedQuery.split("%")[0];
-            String value=finalFetchedQuery.split("%")[1];
-            matrixCursor = new MatrixCursor(new String[]{"key", "value"});
-            matrixCursor.newRow().add(key).add(value);
-            return matrixCursor;
-        }
-        else if (selectionQuery.equals("@")) {
-            Log.d(TAG, "Inside Query @ method");
-            matrixCursor = new MatrixCursor(new String[]{"key", "value"});
-            for (String str : getContext().fileList()) {
-                try {
-                    inputStream = getContext().openFileInput(str);
-                } catch (FileNotFoundException e) {
-                    e.printStackTrace();
+            if ((!selectionQuery.equals("@") && !selectionQuery.equals("*"))) {
+                //queryWaitFlag = true;
+                for (String str : portNumbers) {
+                    String incomingPredecessor = getPredecessor(str);
+                    boolean flag = containsRequest(selectionQuery, str, incomingPredecessor);
+                    if (flag) {
+                        queryHolderPort = str;
+                        Log.d(TAG, "The port where key belongs is" + queryHolderPort);
+                        break;
+                    }
                 }
-                inputStreamReader = new InputStreamReader(inputStream);
-                bufferedReader = new BufferedReader(inputStreamReader);
-                String key = str;
-                String value = null;
-                try {
-                    value = bufferedReader.readLine();
-                } catch (IOException e) {
-                    e.printStackTrace();
+                Log.d(TAG, "Map condition true for" + queryHolderPort + "$" + selectionQuery);
+                //To think whether to make a new map object everytime?
+                //Its the case where two concurrent operations take place at the same node for the same key.
+                waitMap.put(queryHolderPort +"$"+selectionQuery, true);
+                new ClientTask().executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, String.valueOf(Mode.QUERY), queryHolderPort, selectionQuery);
+                // Log.d(TAG, "queryWaitFlag before waiting" + String.valueOf(queryWaitFlag));
+                while (waitMap.get(queryHolderPort + "$" + selectionQuery)) ;
+                //  Log.d(TAG, "queryWaitFlag after waiting" + String.valueOf(queryWaitFlag));
+                Log.d(TAG, "FinalFetchedQuery in individual query" + finalFetchedQuery);
+                if (finalFetchedQuery != null && finalFetchedQuery != "") {
+                    Log.d(TAG, "Inside FinalFetchedQuery is not null");
+                    String key = finalFetchedQuery.split("%")[0];
+                    String value = finalFetchedQuery.split("%")[1];
+                    matrixCursor = new MatrixCursor(new String[]{"key", "value"});
+                    matrixCursor.newRow().add(key).add(value);
+                    return matrixCursor;
                 }
-                matrixCursor.newRow().add(key).add(value);
+
             }
-            return matrixCursor;
-        }
-        else if (selectionQuery.equals("*")) {
-            starQueryWaitFlag=true;
-            keyValueMap=new HashMap<String,String>();
-            starQueryList=new ArrayList<String>();
-            for (String str : portNumbers) {
-                new ClientTask().executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, String.valueOf(Mode.STARQUERY),str);
+
+             if (selectionQuery.equals("@")) {
+                Log.d(TAG, "Inside Query @ method");
+                matrixCursor = new MatrixCursor(new String[]{"key", "value"});
+                for (String str : getContext().fileList()) {
+                    try {
+                        inputStream = getContext().openFileInput(str);
+                    } catch (FileNotFoundException e) {
+                        e.printStackTrace();
+                    }
+                    inputStreamReader = new InputStreamReader(inputStream);
+                    bufferedReader = new BufferedReader(inputStreamReader);
+                    String key = str;
+                    String value = null;
+                    try {
+                        value = bufferedReader.readLine();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    matrixCursor.newRow().add(key).add(value);
+                }
+                return matrixCursor;
             }
-            Log.d(TAG,"starQueryWaitFlag before waiting"+String.valueOf(starQueryWaitFlag));
-            while(starQueryWaitFlag);
-            Log.d(TAG,"starQueryWaitFlag after waiting"+String.valueOf(starQueryWaitFlag));
-            matrixCursor = new MatrixCursor(new String[]{"key", "value"});
-            for(String key:keyValueMap.keySet()){
-                matrixCursor.newRow().add(key).add(keyValueMap.get(key));
+
+
+             if (selectionQuery.equals("*")) {
+                starQueryWaitFlag = true;
+                keyValueMap = new HashMap<String, String>();
+                starQueryList = new ArrayList<String>();
+                for (String str : portNumbers) {
+                    new ClientTask().executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, String.valueOf(Mode.STARQUERY), str);
+                }
+                Log.d(TAG, "starQueryWaitFlag before waiting" + String.valueOf(starQueryWaitFlag));
+                while (starQueryWaitFlag) ;
+                Log.d(TAG, "starQueryWaitFlag after waiting" + String.valueOf(starQueryWaitFlag));
+                matrixCursor = new MatrixCursor(new String[]{"key", "value"});
+                for (String key : keyValueMap.keySet()) {
+                    matrixCursor.newRow().add(key).add(keyValueMap.get(key));
+                }
+                return matrixCursor;
             }
-            return matrixCursor;
-        }
+
         return null;
     }
 
@@ -429,7 +462,6 @@ public class SimpleDynamoProvider extends ContentProvider {
     }
 
     private class ServerTask extends AsyncTask<ServerSocket, String, Void> {
-
         @Override
         protected Void doInBackground(ServerSocket... sockets) {
             ServerSocket serverSocket = sockets[0];
@@ -472,19 +504,21 @@ public class SimpleDynamoProvider extends ContentProvider {
                                 String key=strings.split("~")[1];
                                 String value=strings.split("~")[2];
                                 insertRecord(key,value);
-                                 ps = new PrintStream
+                                ps = new PrintStream
                                         (client.getOutputStream());
                                 ps.println("holderMessageSaved");
                                 ps.flush();
+                                break;
                             case SUCCESSOR1MODE:
                                 Log.d(TAG, "Inside SUCCESSOR1MODE in server");
                                 String key1=strings.split("~")[1];
                                 String value1=strings.split("~")[2];
                                 insertRecord(key1,value1);
-                                 ps = new PrintStream
+                                ps = new PrintStream
                                         (client.getOutputStream());
                                 ps.println("successor1MessageSaved");
                                 ps.flush();
+                                break;
                             case SUCCESSOR2MODE:
                                 Log.d(TAG, "Inside SUCCESSOR2MODE in server");
                                 String key2=strings.split("~")[1];
@@ -494,6 +528,7 @@ public class SimpleDynamoProvider extends ContentProvider {
                                         (client.getOutputStream());
                                 ps.println("successor2MessageSaved");
                                 ps.flush();
+                                break;
                             case QUERY:
                                 Log.d(TAG, "Inside QUERYMODE in server");
                                 String selectionQuery=strings.split("~")[1];
@@ -502,13 +537,16 @@ public class SimpleDynamoProvider extends ContentProvider {
                                         (client.getOutputStream());
                                 ps.println(fetchedQuery);
                                 ps.flush();
+                                break;
                             case STARQUERY:
                                 Log.d(TAG, "Inside STARQUERYMODE in server");
                                 String queryString=getQueryString();
+                                Log.d(TAG, "QueryString is->"+queryString);
                                 ps = new PrintStream
                                         (client.getOutputStream());
                                 ps.println(queryString);
                                 ps.flush();
+                                break;
                             case DELETE:
                                 Log.d(TAG, "Inside DELETEMODE in server");
                                 String selectionQueryDelete=strings.split("~")[1];
@@ -517,6 +555,7 @@ public class SimpleDynamoProvider extends ContentProvider {
                                         (client.getOutputStream());
                                 ps.println("recordDeleted");
                                 ps.flush();
+                                break;
                             case DELETESTAR:
                                 Log.d(TAG, "Inside DELETESTARMODE in server");
                                 deleteAll();
@@ -524,6 +563,7 @@ public class SimpleDynamoProvider extends ContentProvider {
                                         (client.getOutputStream());
                                 ps.println("DeletedAll");
                                 ps.flush();
+                                break;
                         }
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -561,73 +601,79 @@ public class SimpleDynamoProvider extends ContentProvider {
 
                 //new ClientTask().executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, String.valueOf(Mode.INSERTMODE), holderPort, succesor1Port, succesor2Port, key, value);
                 case HOLDERINSERTMODE:
-                            Log.d(TAG, "Inside HOLDERINSERTMODE in client");
-                            String holderPort = msgs[1];
-                            String key = msgs[2];
-                            String value = msgs[3];
-                            String holderPortNumber = String.valueOf((Integer.parseInt(holderPort) * 2));
-                            try {
-                                Socket socket = new Socket(InetAddress.getByAddress(new byte[]{10, 0, 2, 2}), Integer.parseInt(holderPortNumber));
-                                //socket.setSoTimeout(10000);
-                                if (socket.isConnected()) {
-                                    PrintStream ps = new PrintStream
-                                            (socket.getOutputStream());
-                                    ps.println(String.valueOf(Mode.HOLDERINSERTMODE)+"~"+key+"~"+value);
-                                    ps.flush();
-                                    //ps.close();
-                                    //check socket time out before closing the socket.
-                                    in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-                                    String msg=in.readLine();
-                                    if(msg.equals("holderMessageSaved"))
-                                        acknList.add("holderDone");
-                                    Log.d(TAG,"AckList is-->"+acknList.toString());
-                                    if(acknList.size()==3){
-                                        waitFlag=false;
-                                        Log.d(TAG, "waitflag condition false in HOLDERINSERTMODE");
-                                    }
-                                    socket.close();
-                                }
-                            } catch (IOException e) {
-                                e.printStackTrace();
+                    Log.d(TAG, "Inside HOLDERINSERTMODE in client");
+                    String holderPort = msgs[1];
+                    String key = msgs[2];
+                    String value = msgs[3];
+                    String holderPortNumber = String.valueOf((Integer.parseInt(holderPort) * 2));
+                    Log.d(TAG, "HolderPort number in HOLDERINSERTMODE in client->"+holderPortNumber);
+                    try {
+                        Socket socket = new Socket(InetAddress.getByAddress(new byte[]{10, 0, 2, 2}), Integer.parseInt(holderPortNumber));
+                        //socket.setSoTimeout(10000);
+                        if (socket.isConnected()) {
+                            PrintStream ps = new PrintStream
+                                    (socket.getOutputStream());
+                            ps.println(String.valueOf(Mode.HOLDERINSERTMODE)+"~"+key+"~"+value);
+                            ps.flush();
+                            //ps.close();
+                            //check socket time out before closing the socket.
+                            in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+                            String msg=in.readLine();
+                            Log.d(TAG,"Message Received in holder mode from server-->"+msg);
+                            if(msg.equals("holderMessageSaved")) {
+                                acknList.add("holderDone");
                             }
-                            break;
-                   case SUCCESSOR1MODE:
-                            Log.d(TAG, "Inside SUCCESSOR1MODE in client");
-                            String successor1Port = msgs[1];
-                            String key1 = msgs[2];
-                            String  value1 = msgs[3];
-                            String successor1PortNumber = String.valueOf((Integer.parseInt(successor1Port) * 2));
-                            try {
-                                Socket socket = new Socket(InetAddress.getByAddress(new byte[]{10, 0, 2, 2}), Integer.parseInt(successor1PortNumber));
-                                //socket.setSoTimeout(10000);
-                                if (socket.isConnected()) {
-                                    PrintStream ps = new PrintStream
-                                            (socket.getOutputStream());
-                                    ps.println(String.valueOf(Mode.SUCCESSOR1MODE)+"~"+key1+"~"+value1);
-                                    ps.flush();
-                                   // ps.close();
-                                    //check socket time out before closing the socket.
-                                    in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-                                    String msg=in.readLine();
-                                    if(msg.equals("successor1MessageSaved"))
-                                        acknList.add("successor1Done");
-                                    Log.d(TAG,"AckList is-->"+acknList.toString());
-                                    if(acknList.size()==3){
-                                        waitFlag=false;
-                                        Log.d(TAG, "waitflag condition false in SUCCESSOR1MODE");
-                                    }
-                                    socket.close();
-                                }
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            }
-                       break;
+                            Log.d(TAG,"AckList is-->"+acknList.toString());
+                            /*if(acknList.size()==3){
+                                waitFlag=false;
+                                Log.d(TAG, "waitflag condition false in HOLDERINSERTMODE");
+                            }*/
+                            //socket.close();
+                        }
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    break;
+                case SUCCESSOR1MODE:
+                    Log.d(TAG, "Inside SUCCESSOR1MODE in client");
+                    String successor1Port = msgs[1];
+                    String key1 = msgs[2];
+                    String  value1 = msgs[3];
+                    String successor1PortNumber = String.valueOf((Integer.parseInt(successor1Port) * 2));
+                    Log.d(TAG, "successor1PortNumber in client->"+successor1PortNumber);
+                    try {
+                        Socket socket = new Socket(InetAddress.getByAddress(new byte[]{10, 0, 2, 2}), Integer.parseInt(successor1PortNumber));
+                        //socket.setSoTimeout(10000);
+                        if (socket.isConnected()) {
+                            PrintStream ps = new PrintStream
+                                    (socket.getOutputStream());
+                            ps.println(String.valueOf(Mode.SUCCESSOR1MODE)+"~"+key1+"~"+value1);
+                            ps.flush();
+                            // ps.close();
+                            //check socket time out before closing the socket.
+                            in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+                            String msg1=in.readLine();
+                            Log.d(TAG,"Message Received in SUCCESSOR1MODE mode from server-->"+msg1);
+                            if(msg1.equals("successor1MessageSaved"))
+                                acknList.add("successor1Done");
+                            Log.d(TAG,"AckList is-->"+acknList.toString());
+                            /*if(acknList.size()==3){
+                                waitFlag=false;
+                                Log.d(TAG, "waitflag condition false in SUCCESSOR1MODE");
+                            }*/
+                            //socket.close();
+                        }
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    break;
                 case SUCCESSOR2MODE:
                     Log.d(TAG, "Inside SUCCESSOR2MODE in client");
                     String successor2Port = msgs[1];
                     String key2 = msgs[2];
                     String value2 = msgs[3];
                     String successor2PortNumber = String.valueOf((Integer.parseInt(successor2Port) * 2));
+                    Log.d(TAG, "successor1PortNumber in client->"+successor2PortNumber);
                     try {
                         Socket socket = new Socket(InetAddress.getByAddress(new byte[]{10, 0, 2, 2}), Integer.parseInt(successor2PortNumber));
                         //  socket.setSoTimeout(10000);
@@ -636,29 +682,31 @@ public class SimpleDynamoProvider extends ContentProvider {
                                     (socket.getOutputStream());
                             ps.println(String.valueOf(Mode.SUCCESSOR2MODE)+"~"+key2+"~"+value2);
                             ps.flush();
-                           // ps.close();
+                            // ps.close();
                             //check socket time out before closing the socket.
                             in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-                            String msg=in.readLine();
-                            if(msg.equals("successor2MessageSaved"))
+                            String msg2=in.readLine();
+                            Log.d(TAG,"Message Received in SUCCESSOR2MODE mode from server-->"+msg2);
+                            if(msg2.equals("successor2MessageSaved"))
                                 acknList.add("successor2Done");
                             Log.d(TAG,"AckList is-->"+acknList.toString());
-                            if(acknList.size()==3){
+                            /*if(acknList.size()==3){
                                 waitFlag=false;
                                 Log.d(TAG, "waitflag condition false in SUCCESSOR2MODE");
-                            }
-                            socket.close();
+                            }*/
+                            // socket.close();
                         }
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
                     break;
-                   // new ClientTask().executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, String.valueOf(Mode.QUERY),queryHolderPort,selectionQuery);
+                // new ClientTask().executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, String.valueOf(Mode.QUERY),queryHolderPort,selectionQuery);4
                 case QUERY:
                     Log.d(TAG, "Inside QUERYMODE in client");
                     String queryHolderPort = msgs[1];
                     String selectionQuery = msgs[2];
                     String queryHolderPortNumber = String.valueOf((Integer.parseInt(queryHolderPort) * 2));
+                    Log.d(TAG, "queryHolderPortNumber in client->"+queryHolderPortNumber);
                     try {
                         Socket socket = new Socket(InetAddress.getByAddress(new byte[]{10, 0, 2, 2}), Integer.parseInt(queryHolderPortNumber));
                         //  socket.setSoTimeout(10000);
@@ -667,12 +715,15 @@ public class SimpleDynamoProvider extends ContentProvider {
                                     (socket.getOutputStream());
                             ps.println(String.valueOf(Mode.QUERY)+"~"+selectionQuery);
                             ps.flush();
+                           // queryHolderPort+"$"+selectionQuery
                             // ps.close();
                             //check socket time out before closing the socket.
                             in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
                             finalFetchedQuery=in.readLine();
                             Log.d(TAG,"final query retrieved is"+finalFetchedQuery);
-                            queryWaitFlag=false;
+                            waitMap.put(queryHolderPort+"$"+selectionQuery,false);
+                            Log.d(TAG,"Map condition false for"+queryHolderPort+"$"+selectionQuery);
+                            //queryWaitFlag=false;
                         }
                     } catch (IOException e) {
                         e.printStackTrace();
@@ -683,6 +734,7 @@ public class SimpleDynamoProvider extends ContentProvider {
                     Log.d(TAG, "Inside STARQUERYMODE in client");
                     String port=msgs[1];
                     String portNumber = String.valueOf((Integer.parseInt(port) * 2));
+                    Log.d(TAG, "queryStarPortNumber in client->"+portNumber);
                     try {
                         Socket socket = new Socket(InetAddress.getByAddress(new byte[]{10, 0, 2, 2}), Integer.parseInt(portNumber));
                         if (socket.isConnected()) {
@@ -702,11 +754,13 @@ public class SimpleDynamoProvider extends ContentProvider {
                     catch (IOException e){
                         e.printStackTrace();
                     }
+                    break;
                 case DELETE:
                     Log.d(TAG, "Inside DELETEMODE in client");
                     String holderPortDelete=msgs[1];
                     String selectionQueryDelete = msgs[2];
                     String holderPortDeleteNumber = String.valueOf((Integer.parseInt(holderPortDelete) * 2));
+                    Log.d(TAG, "holderPortDeleteNumber in client->"+holderPortDeleteNumber);
                     try{
                         Socket socket = new Socket(InetAddress.getByAddress(new byte[]{10, 0, 2, 2}), Integer.parseInt(holderPortDeleteNumber));
                         if (socket.isConnected()) {
@@ -717,17 +771,22 @@ public class SimpleDynamoProvider extends ContentProvider {
                             in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
                             String msg=in.readLine();
                             if(msg.equals("recordDeleted")){
-                                deleteWaitFlag=false;
+                                deleteList.add("record Deleted for"+holderPortDelete);
+                                if(deleteList.size()==3) {
+                                    deleteWaitFlag = false;
+                                }
                             }
                         }
                     }
                     catch (IOException e){
                         e.printStackTrace();
                     }
+                    break;
                 case DELETESTAR:
                     Log.d(TAG, "Inside DELETESTARMODE in client");
                     String starholderPortDelete=msgs[1];
                     String starholderPortDeleteNumber = String.valueOf((Integer.parseInt(starholderPortDelete) * 2));
+                    Log.d(TAG, "starholderPortDeleteNumber in client->"+starholderPortDeleteNumber);
                     try{
                         Socket socket = new Socket(InetAddress.getByAddress(new byte[]{10, 0, 2, 2}), Integer.parseInt(starholderPortDeleteNumber));
                         if (socket.isConnected()) {
@@ -738,8 +797,8 @@ public class SimpleDynamoProvider extends ContentProvider {
                             in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
                             String msg=in.readLine();
                             if(msg.equals("DeletedAll")){
-                                deleteList.add("All keys deleted for"+starholderPortDelete);
-                                if(deleteList.size()==5){
+                                deleteStarList.add("All keys deleted for"+starholderPortDelete);
+                                if(deleteStarList.size()==5){
                                     deleteWaitFlag=false;
                                 }
 
@@ -749,6 +808,7 @@ public class SimpleDynamoProvider extends ContentProvider {
                     catch (IOException e){
                         e.printStackTrace();
                     }
+                    break;
             }
             return null;
         }

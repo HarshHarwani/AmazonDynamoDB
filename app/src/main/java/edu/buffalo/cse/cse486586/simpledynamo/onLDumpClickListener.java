@@ -14,7 +14,7 @@ import java.util.Arrays;
     public class onLDumpClickListener implements View.OnClickListener {
 
         private static final String TAG = "onLDumpClickListener";
-        private static final int TEST_CNT = 50;
+        private static final int TEST_CNT = 10;
         private static final String KEY_FIELD = "key";
         private static final String VALUE_FIELD = "value";
 
