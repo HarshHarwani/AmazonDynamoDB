@@ -20,7 +20,6 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
-
 import android.content.ContentProvider;
 import android.content.ContentValues;
 import android.content.Context;
@@ -55,7 +54,7 @@ public class SimpleDynamoProvider extends ContentProvider {
     List<String> acknList=null;
     List<String> starQueryList=null;
     public static Map<String,Boolean> waitMap=new HashMap<String,Boolean>();
-   // public static Map<String,Boolean> insertWaitMap=new HashMap<String,Boolean>();
+   public static Map<String,List<String>> insertWaitMap=new HashMap<String,List<String>>();
     public static Map<String,String> ringMap=new TreeMap<String,String>();
     public Map<String,String> keyValueMap=null;
     //buildUri method for content provider
@@ -114,7 +113,6 @@ public class SimpleDynamoProvider extends ContentProvider {
         return 0;
 
     }
-
     //deleting all the entries in the content provider.
     public int deleteAll() {
         try {
@@ -127,7 +125,6 @@ public class SimpleDynamoProvider extends ContentProvider {
             return 0;
         }
     }
-
     //Deleting a particular record
     public int deleteRecord(String key) {
         try {
@@ -152,6 +149,7 @@ public class SimpleDynamoProvider extends ContentProvider {
         acknList=new ArrayList<String>();
         String key = (String) values.get("key");
         String value = (String) values.get("value");
+        insertWaitMap.put(key+"$"+portStr,acknList);
         Log.d("InsideInsertMethodKey", key);
         Log.d("InsideInsertMethodValue", value);
         String holderPort = null;
@@ -175,9 +173,10 @@ public class SimpleDynamoProvider extends ContentProvider {
             new ClientTask().executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, String.valueOf(Mode.HOLDERINSERTMODE),holderPort,key,value);
             new ClientTask().executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, String.valueOf(Mode.SUCCESSOR1MODE),succesor1Port,key,value);
             new ClientTask().executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, String.valueOf(Mode.SUCCESSOR2MODE),succesor2Port,key,value);
-            Log.d(TAG,"WaitFlag before waiting"+String.valueOf(waitFlag));
-            while(acknList.size()!=3);
-            Log.d(TAG,"WaitFlag after waiting"+String.valueOf(waitFlag));
+            while (insertWaitMap.get(key+"$"+portStr).size()!=3);
+           // Log.d(TAG,"WaitFlag before waiting"+String.valueOf(waitFlag));
+           // while(acknList.size()<2);
+            //Log.d(TAG,"WaitFlag after waiting"+String.valueOf(waitFlag));
             Log.d(TAG,"Insert Successful");
 
         } catch (Exception e) {
@@ -621,9 +620,11 @@ public class SimpleDynamoProvider extends ContentProvider {
                             String msg=in.readLine();
                             Log.d(TAG,"Message Received in holder mode from server-->"+msg);
                             if(msg.equals("holderMessageSaved")) {
-                                acknList.add("holderDone");
+                                acknList=insertWaitMap.get(key+"$"+portStr);
+                                acknList.add("holderMessageSaved");
                             }
                             Log.d(TAG,"AckList is-->"+acknList.toString());
+                          //  Log.d(TAG,"AckList is-->"+acknList.toString());*/
                             /*if(acknList.size()==3){
                                 waitFlag=false;
                                 Log.d(TAG, "waitflag condition false in HOLDERINSERTMODE");
@@ -654,8 +655,11 @@ public class SimpleDynamoProvider extends ContentProvider {
                             in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
                             String msg1=in.readLine();
                             Log.d(TAG,"Message Received in SUCCESSOR1MODE mode from server-->"+msg1);
-                            if(msg1.equals("successor1MessageSaved"))
+                            if(msg1.equals("successor1MessageSaved")){
+                                acknList=insertWaitMap.get(key1+"$"+portStr);
                                 acknList.add("successor1Done");
+                            }
+
                             Log.d(TAG,"AckList is-->"+acknList.toString());
                             /*if(acknList.size()==3){
                                 waitFlag=false;
@@ -687,10 +691,13 @@ public class SimpleDynamoProvider extends ContentProvider {
                             in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
                             String msg2=in.readLine();
                             Log.d(TAG,"Message Received in SUCCESSOR2MODE mode from server-->"+msg2);
-                            if(msg2.equals("successor2MessageSaved"))
+                            if(msg2.equals("successor2MessageSaved")){
+                                acknList=insertWaitMap.get(key2+"$"+portStr);
                                 acknList.add("successor2Done");
+                            }
+
                             Log.d(TAG,"AckList is-->"+acknList.toString());
-                            /*if(acknList.size()==3){
+                             /*if(acknList.size()==3){
                                 waitFlag=false;
                                 Log.d(TAG, "waitflag condition false in SUCCESSOR2MODE");
                             }*/
