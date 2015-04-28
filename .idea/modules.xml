@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/SimpleDynamo.iml" filepath="$PROJECT_DIR$/SimpleDynamo.iml" />
+      <module fileurl="file://$PROJECT_DIR$/AmazonDynamoDB-master.iml" filepath="$PROJECT_DIR$/AmazonDynamoDB-master.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
     </modules>
   </component>

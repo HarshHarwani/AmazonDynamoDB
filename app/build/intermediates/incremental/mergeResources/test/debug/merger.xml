@@ -1,2 +1,2 @@
 <?xml version="1.0" encoding="utf-8"?>
-<merger version="3"><dataSet config="main"><source path="/home/hharwani/Desktop/DS_FINAL/SimpleDynamo/app/src/androidTest/res"/><source path="/home/hharwani/Desktop/DS_FINAL/SimpleDynamo/app/build/generated/res/rs/test/debug"/><source path="/home/hharwani/Desktop/DS_FINAL/SimpleDynamo/app/build/generated/res/generated/test/debug"/></dataSet><mergedItems/></merger>
+<merger version="3"><dataSet config="main"><source path="/home/hharwani/DS_FINAL/AmazonDynamoDB-master/app/src/androidTest/res"/><source path="/home/hharwani/DS_FINAL/AmazonDynamoDB-master/app/build/generated/res/rs/test/debug"/><source path="/home/hharwani/DS_FINAL/AmazonDynamoDB-master/app/build/generated/res/generated/test/debug"/></dataSet><mergedItems/></merger>

@@ -35,4 +35,4 @@
         android:layout_alignParentTop="true"
         android:layout_alignParentEnd="true"
         android:text="test" />
-</RelativeLayout><!-- From: file:/home/hharwani/Desktop/DS_FINAL/SimpleDynamo/app/src/main/res/layout/activity_simple_dynamo.xml -->
+</RelativeLayout><!-- From: file:/home/hharwani/DS_FINAL/AmazonDynamoDB-master/app/src/main/res/layout/activity_simple_dynamo.xml -->
