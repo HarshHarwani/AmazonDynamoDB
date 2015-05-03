@@ -1,1 +1,1 @@
-/home/hharwani/Desktop/DS_FINAL/SimpleDynamo/app/build/intermediates/classes/debug
+/home/hharwani/DS_FINAL/AmazonDynamoDB-master/app/build/intermediates/classes/debug
