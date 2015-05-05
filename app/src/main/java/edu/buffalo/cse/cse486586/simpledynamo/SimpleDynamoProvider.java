@@ -29,6 +29,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.MatrixCursor;
 import android.net.Uri;
+import android.nfc.Tag;
 import android.os.AsyncTask;
 import android.telephony.TelephonyManager;
 import android.util.Log;
@@ -56,6 +57,7 @@ public class SimpleDynamoProvider extends ContentProvider {
     Boolean starQueryWaitFlag=false;
     Boolean nodeIsUpFlag=false;
     Boolean failureFlag=false;
+    Boolean syncFlag=false;
     List<String> deleteStarList=null;
     // List<String> deleteList=null;
     List<String> acknList=null;
@@ -63,7 +65,9 @@ public class SimpleDynamoProvider extends ContentProvider {
     public static Map<String,Boolean> waitMap=new ConcurrentHashMap<String,Boolean>();
     public static Map<String,List<String>> insertWaitMap=new ConcurrentHashMap<String,List<String>>();
     public static Map<String,String> ringMap=new TreeMap<String,String>();
+    public static Map<String,String> genHashMap=new HashMap<>();
     public Map<String,String> keyValueMap=null;
+    public List<String> syncList=null;
     public Map<String,String> syncMap=null;
     public Map<String,String> syncMapSuccessor=null;
     public Map<String,String> syncMapPredecessor=null;
@@ -85,7 +89,7 @@ public class SimpleDynamoProvider extends ContentProvider {
         String succesor2Port = null;
         String selectionQuery = selection.replaceAll("\"", "");
         if (selectionQuery.equals("@")) {
-            deleteAll();
+            deleteAllSync();
             return 1;
         } else if ((!selectionQuery.equals("@") && !selectionQuery.equals("*"))) {
             //deleteList=new ArrayList<String>();
@@ -136,6 +140,20 @@ public class SimpleDynamoProvider extends ContentProvider {
             return 0;
         }
     }
+    public int deleteAllSync() {
+        try {
+            for (String str : getContext().fileList()) {
+                if(!str.equals("dummyRecord")) {
+                    getContext().deleteFile(str);
+                }
+            }
+            return 1;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return 0;
+        }
+    }
+
     //Deleting a particular record
     public int deleteRecord(String key) {
         try {
@@ -157,6 +175,8 @@ public class SimpleDynamoProvider extends ContentProvider {
     public Uri insert(Uri uri, ContentValues values) {
         // TODO Auto-generated method stub
         // waitFlag=true;
+        Log.d(TAG,"Value of syncFlag in Insert"+String.valueOf(syncFlag));
+        while (syncFlag);
         Log.d(TAG,"Inside Insert Method");
         acknList=new ArrayList<String>();
         String key = (String) values.get("key");
@@ -186,7 +206,7 @@ public class SimpleDynamoProvider extends ContentProvider {
             new ClientTask().executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, String.valueOf(Mode.SUCCESSOR1MODE),succesor1Port,key,value);
             new ClientTask().executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, String.valueOf(Mode.SUCCESSOR2MODE),succesor2Port,key,value);
             Log.d(TAG,"WaitFlag before waiting"+insertWaitMap.get(key+"$"+portStr));
-            while (insertWaitMap.get(key+"$"+portStr).size()<2);
+            while ((insertWaitMap.get(key+"$"+portStr).size()<2));
             Log.d(TAG,"WaitFlag after waiting"+insertWaitMap.get(key+"$"+portStr));
             Log.d(TAG,"Insert Successful");
             // Log.d(TAG,"WaitFlag before waiting"+String.valueOf(waitFlag));
@@ -226,6 +246,11 @@ public class SimpleDynamoProvider extends ContentProvider {
             ringMap.put(genHash("5554"), "5554");
             ringMap.put(genHash("5558"), "5558");
             ringMap.put(genHash("5560"), "5560");
+            genHashMap.put("5562","177ccecaec32c54b82d5aaafc18a2dadb753e3b1");
+            genHashMap.put("5556","208f7f72b198dadd244e61801abe1ec3a4857bc9");
+            genHashMap.put("5554","33d6357cfaaf0f72991b0ecd8c56da066613c089");
+            genHashMap.put("5558","abf0fd8db03e5ecb199a9b82929e9db79b909643");
+            genHashMap.put("5560","c25ddd596aa7c81fa12378fa725f706d54325d12");
         }
         catch (NoSuchAlgorithmException e){
             e.printStackTrace();
@@ -239,15 +264,21 @@ public class SimpleDynamoProvider extends ContentProvider {
             //Getting the value of two successors for a given port.
             if(fileExist("dummyRecord")){
                 nodeIsUpFlag=true;
+                syncFlag=true;
                 Log.d(TAG, "Inside FileExists Condition");
             }
             if(nodeIsUpFlag){
+                deleteAllSync();
                 String[] successors = getSuccessors(portStr);
                 String[] predecessors=getFirstSecondPredecessor(portStr);
+                Log.d(TAG,"Value of syncFlag"+String.valueOf(syncFlag));
+                syncList=new ArrayList<>();
                 syncRequest(successors,predecessors);
                 Log.d(TAG, "Inside nodeIsUp Condition");
             }
+            if(!fileExist("dummyRecord")){
             insertRecord("dummyRecord","dummyValue");
+            }
             String[] successors = getSuccessors(portStr);
             firstSuccesor = successors[0];
             secondSuccessor = successors[1];
@@ -286,9 +317,10 @@ public class SimpleDynamoProvider extends ContentProvider {
         Log.d(TAG, "secondSuccessor is-->" + secondSuccessor);
         Log.d(TAG, "My firstPredecessor is-->" + firstPredecessor);
         Log.d(TAG, "My secondPredecessor is-->" + secondPredecessor);
-        for(String str:successors){
-            new ClientTask().executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, String.valueOf(Mode.SYNCSUCCESSORS),str);
-        }
+        Log.d(TAG,"Vaue of syncFlag in syncRequest"+String.valueOf(syncFlag));
+       // for(String str:successors){
+            new ClientTask().executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, String.valueOf(Mode.SYNCSUCCESSORS),firstSuccessor);
+       // }
         for(String str1:predecessors){
             new ClientTask().executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, String.valueOf(Mode.SYNCPREDECESSORS),str1);
         }
@@ -408,9 +440,9 @@ public class SimpleDynamoProvider extends ContentProvider {
         boolean flag = false;
         try {
             Log.d("Inside contains Request", "Query-->" + query + " " + "Predecessor->=" + incomingPredecessor + " " + "client->" + portNo);
-            if (genHash(incomingPredecessor).compareTo(genHash(portNo)) > 0 && (((genHash(query).compareTo(genHash(portNo)) < 0) || (genHash(query).compareTo(genHash(incomingPredecessor)) > 0))))
+            if (genHash(incomingPredecessor).compareTo(genHashMap.get(portNo)) > 0 && (((genHash(query).compareTo(genHashMap.get(portNo)) < 0) || (genHash(query).compareTo(genHashMap.get(incomingPredecessor)) > 0))))
                 flag = true;
-            else if (genHash(query).compareTo(genHash(incomingPredecessor)) > 0 && genHash(query).compareTo(genHash(portNo)) <= 0)
+            else if (genHash(query).compareTo(genHashMap.get(incomingPredecessor)) > 0 && genHash(query).compareTo(genHashMap.get(portNo)) <= 0)
                 flag = true;
             else if (incomingPredecessor.equals(portNo) && portNo.equals(incomingPredecessor))
                 flag = true;
@@ -487,7 +519,8 @@ public class SimpleDynamoProvider extends ContentProvider {
         Log.d("selection",selection);
         String selectionQuery= selection.replaceAll("\"","");
         Log.d("selectionQuery",selectionQuery);
-        synchronized (this) {
+        Log.d(TAG,"Value of syncFlag in query"+String.valueOf(syncFlag));
+        while (syncFlag);
             if ((!selectionQuery.equals("@") && !selectionQuery.equals("*"))) {
                 //queryWaitFlag = true;
                 for (String str : portNumbers) {
@@ -505,7 +538,9 @@ public class SimpleDynamoProvider extends ContentProvider {
                 waitMap.put(queryHolderPort + "$" + selectionQuery, true);
                 new ClientTask().executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, String.valueOf(Mode.QUERY), queryHolderPort, selectionQuery);
                 // Log.d(TAG, "queryWaitFlag before waiting" + String.valueOf(queryWaitFlag));
-                while (waitMap.get(queryHolderPort + "$" + selectionQuery)) ;
+                Log.d(TAG,"SYNCFLAG VALUE Before Waiting"+String.valueOf(syncFlag));
+                while ((waitMap.get(queryHolderPort + "$" + selectionQuery))) ;
+                Log.d(TAG,"SYNCFLAG VALUE After Waiting"+String.valueOf(syncFlag));
                 //  Log.d(TAG, "queryWaitFlag after waiting" + String.valueOf(queryWaitFlag));
                 Log.d(TAG, "FinalFetchedQuery in individual query" + finalFetchedQuery);
                 if (finalFetchedQuery != null && finalFetchedQuery != "") {
@@ -518,8 +553,6 @@ public class SimpleDynamoProvider extends ContentProvider {
                 }
 
             }
-        }
-
         if (selectionQuery.equals("@")) {
             Log.d(TAG, "Inside Query @ method");
             matrixCursor = new MatrixCursor(new String[]{"key", "value"});
@@ -544,13 +577,11 @@ public class SimpleDynamoProvider extends ContentProvider {
             }
             return matrixCursor;
         }
-
-
         if (selectionQuery.equals("*")) {
-            if(fileExist("dummyRecord")){
+           /* if(fileExist("dummyRecord")){
                 deleteRecord("dummyRecord");
                 Log.d(TAG,"dummy record deleted in *");
-            }
+            }*/
             starQueryWaitFlag = true;
             keyValueMap = new HashMap<String, String>();
             starQueryList = new ArrayList<String>();
@@ -568,10 +599,8 @@ public class SimpleDynamoProvider extends ContentProvider {
             }
             return matrixCursor;
         }
-
         return null;
     }
-
     @Override
     public int update(Uri uri, ContentValues values, String selection,
                       String[] selectionArgs) {
@@ -628,6 +657,7 @@ public class SimpleDynamoProvider extends ContentProvider {
                         Mode mode = Mode.valueOf(modeString);
                         switch (mode) {
                             case HOLDERINSERTMODE:
+                                while (syncFlag);
                                 Log.d(TAG, "Inside HOLDERINSERTMODE in server");
                                 String key=strings.split("~")[1];
                                 String value=strings.split("~")[2];
@@ -638,6 +668,7 @@ public class SimpleDynamoProvider extends ContentProvider {
                                 ps.flush();
                                 break;
                             case SUCCESSOR1MODE:
+                                while (syncFlag);
                                 Log.d(TAG, "Inside SUCCESSOR1MODE in server");
                                 String key1=strings.split("~")[1];
                                 String value1=strings.split("~")[2];
@@ -648,6 +679,7 @@ public class SimpleDynamoProvider extends ContentProvider {
                                 ps.flush();
                                 break;
                             case SUCCESSOR2MODE:
+                                while (syncFlag);
                                 Log.d(TAG, "Inside SUCCESSOR2MODE in server");
                                 String key2=strings.split("~")[1];
                                 String value2=strings.split("~")[2];
@@ -658,6 +690,7 @@ public class SimpleDynamoProvider extends ContentProvider {
                                 ps.flush();
                                 break;
                             case QUERY:
+                                while (syncFlag);
                                 Log.d(TAG, "Inside QUERYMODE in server");
                                 String selectionQuery=strings.split("~")[1];
                                 String fetchedQuery=queryRecord(selectionQuery);
@@ -668,6 +701,7 @@ public class SimpleDynamoProvider extends ContentProvider {
                                 ps.flush();
                                 break;
                             case REDIRECTQUERY:
+                                while (syncFlag);
                                 Log.d(TAG, "Inside REDIRECTQUERY in server");
                                 String redirectedQuery=strings.split("~")[1];
                                 String fetchedRedirectedQuery=queryRecord(redirectedQuery);
@@ -748,8 +782,8 @@ public class SimpleDynamoProvider extends ContentProvider {
             e.printStackTrace();
         }
     }
-
     public void redirectQuery(String firstSuccesor,String selectionQuery,String queryHolderPort){
+        while (syncFlag);
         new ClientTask().executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, String.valueOf(Mode.REDIRECTQUERY),firstSuccesor,selectionQuery,queryHolderPort);
 
     }
@@ -1085,6 +1119,11 @@ public class SimpleDynamoProvider extends ContentProvider {
                             String queryStringSuccessor=in.readLine();
                             insertQueryStringIntoSyncMap(queryStringSuccessor,syncMapSuccessor);
                             insertSyncMapIntoContentProvider(syncMapSuccessor);
+                            syncList.add("successor done");
+                            if(syncList.size()==3){
+                                syncFlag=false;
+                            }
+                            Log.d(TAG,"syncList-->"+syncList.toString());
                             //queryWaitFlag=false;
                         }
                     }catch (SocketTimeoutException e){
@@ -1112,6 +1151,11 @@ public class SimpleDynamoProvider extends ContentProvider {
                             String queryStringPredecessor=in.readLine();
                             insertQueryStringIntoSyncMap(queryStringPredecessor,syncMapPredecessor);
                             insertSyncMapIntoContentProvider(syncMapPredecessor);
+                            syncList.add("predecessor done");
+                            if(syncList.size()==3){
+                                syncFlag=false;
+                            }
+                            Log.d(TAG,"syncList-->"+syncList.toString());
                             //queryWaitFlag=false;
                         }
                     }catch (SocketTimeoutException e){

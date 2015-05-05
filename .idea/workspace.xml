@@ -47,7 +47,7 @@
       <file leaf-file-name="SimpleDynamoActivity.java" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/app/src/main/java/edu/buffalo/cse/cse486586/simpledynamo/SimpleDynamoActivity.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="924">
+            <state vertical-scroll-proportion="0.0" vertical-offset="147" max-vertical-offset="945">
               <caret line="7" column="0" selection-start-line="7" selection-start-column="0" selection-end-line="7" selection-end-column="0" />
               <folding />
             </state>
@@ -57,7 +57,7 @@
       <file leaf-file-name="OnTestClickListener.java" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/app/src/main/java/edu/buffalo/cse/cse486586/simpledynamo/OnTestClickListener.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0" vertical-offset="2054" max-vertical-offset="2982">
+            <state vertical-scroll-proportion="0.0" vertical-offset="399" max-vertical-offset="2982">
               <caret line="54" column="33" selection-start-line="54" selection-start-column="33" selection-end-line="54" selection-end-column="33" />
               <folding>
                 <element signature="e#1818#1819#0" expanded="true" />
@@ -69,7 +69,7 @@
       <file leaf-file-name="onLDumpClickListener.java" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/app/src/main/java/edu/buffalo/cse/cse486586/simpledynamo/onLDumpClickListener.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="1701">
+            <state vertical-scroll-proportion="0.0" vertical-offset="1365" max-vertical-offset="1848">
               <caret line="65" column="43" selection-start-line="65" selection-start-column="43" selection-end-line="65" selection-end-column="43" />
               <folding />
             </state>
@@ -79,16 +79,10 @@
       <file leaf-file-name="SimpleDynamoProvider.java" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/app/src/main/java/edu/buffalo/cse/cse486586/simpledynamo/SimpleDynamoProvider.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="3.862963" vertical-offset="819" max-vertical-offset="23877">
-              <caret line="188" column="61" selection-start-line="188" selection-start-column="61" selection-end-line="188" selection-end-column="61" />
+            <state vertical-scroll-proportion="5.2181816" vertical-offset="3843" max-vertical-offset="24780">
+              <caret line="306" column="5" selection-start-line="306" selection-start-column="5" selection-end-line="306" selection-end-column="5" />
               <folding>
                 <element signature="imports" expanded="true" />
-                <element signature="e#2206#2222#0" expanded="true" />
-                <element signature="e#2304#2325#0" expanded="true" />
-                <element signature="e#2385#2400#0" expanded="true" />
-                <element signature="e#18176#18184#0" expanded="true" />
-                <element signature="e#18640#18648#0" expanded="true" />
-                <element signature="e#19286#19294#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -98,7 +92,7 @@
   </component>
   <component name="FindManager">
     <FindUsagesManager>
-      <setting name="OPEN_NEW_TAB" value="true" />
+      <setting name="OPEN_NEW_TAB" value="false" />
     </FindUsagesManager>
   </component>
   <component name="GradleLocalSettings">
@@ -1164,9 +1158,9 @@
   </component>
   <component name="ProjectFrameBounds">
     <option name="x" value="65" />
-    <option name="y" value="24" />
+    <option name="y" value="-4" />
     <option name="width" value="1855" />
-    <option name="height" value="1056" />
+    <option name="height" value="1084" />
   </component>
   <component name="ProjectLevelVcsManager" settingsEditedManually="false">
     <OptionsSetting value="true" id="Add" />
@@ -1209,10 +1203,13 @@
     <property name="DEBUGGABLE_PROCESS" value="edu.buffalo.cse.cse486586.simpledynamo" />
     <property name="SHOW_ALL_PROCESSES" value="false" />
     <property name="ANDROID_EXTENDED_DEVICE_CHOOSER_AVD" value="Nexus_5_API_21_x86" />
-    <property name="options.lastSelected" value="reference.settingsdialog.IDE.editor.colors" />
+    <property name="options.lastSelected" value="preferences.keymap" />
     <property name="options.splitter.main.proportions" value="0.3" />
     <property name="options.splitter.details.proportions" value="0.2" />
     <property name="options.searchVisible" value="true" />
+    <property name="OverrideImplement.combined" value="true" />
+    <property name="OverrideImplement.overriding.sorted" value="false" />
+    <property name="SearchEverywhereHistoryKey" value="avd &#9;ACTION&#9;Android.RunAndroidAvdManager" />
   </component>
   <component name="RunManager" selected="Android Application.app">
     <configuration default="true" type="Remote" factoryName="Remote">
@@ -1391,12 +1388,12 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="65" y="24" width="1855" height="1056" extended-state="6" />
+    <frame x="65" y="-4" width="1855" height="1084" extended-state="7" />
     <editor active="true" />
     <layout>
       <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32881" sideWeight="0.4997236" order="6" side_tool="false" content_ui="tabs" />
-      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3290461" sideWeight="0.4997236" order="8" side_tool="false" content_ui="tabs" />
+      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32881" sideWeight="0.4997236" order="8" side_tool="false" content_ui="tabs" />
       <window_info id="Build Variants" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
       <window_info id="Palette&#9;" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="SLIDING" type="SLIDING" visible="false" weight="0.4" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
@@ -1406,12 +1403,13 @@
       <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32881" sideWeight="0.4997236" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="11" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3290461" sideWeight="0.4997236" order="12" side_tool="false" content_ui="tabs" />
-      <window_info id="Android" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.07620042" sideWeight="0.4997236" order="13" side_tool="false" content_ui="tabs" />
+      <window_info id="Android" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.37578288" sideWeight="0.4997236" order="13" side_tool="false" content_ui="tabs" />
       <window_info id="Gradle Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="14" side_tool="true" content_ui="tabs" />
       <window_info id="Designer" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.054173578" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
-      <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.2498618" sideWeight="0.5" order="7" side_tool="true" content_ui="combo" />
+      <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.249309" sideWeight="0.5" order="7" side_tool="true" content_ui="combo" />
       <window_info id="Memory Monitor" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="15" side_tool="true" content_ui="tabs" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32985386" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Gradle" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32946378" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.20121615" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.34759918" sideWeight="0.8706468" order="5" side_tool="false" content_ui="tabs" />
@@ -1422,7 +1420,6 @@
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Preview" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32946378" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
-      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
     </layout>
   </component>
   <component name="Vcs.Log.UiProperties">
@@ -1464,12 +1461,6 @@
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
             <element signature="imports" expanded="true" />
-            <element signature="e#2206#2222#0" expanded="true" />
-            <element signature="e#2304#2325#0" expanded="true" />
-            <element signature="e#2385#2400#0" expanded="true" />
-            <element signature="e#18176#18184#0" expanded="true" />
-            <element signature="e#18640#18648#0" expanded="true" />
-            <element signature="e#19286#19294#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -1506,12 +1497,6 @@
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
             <element signature="imports" expanded="true" />
-            <element signature="e#2206#2222#0" expanded="true" />
-            <element signature="e#2304#2325#0" expanded="true" />
-            <element signature="e#2385#2400#0" expanded="true" />
-            <element signature="e#18176#18184#0" expanded="true" />
-            <element signature="e#18640#18648#0" expanded="true" />
-            <element signature="e#19286#19294#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -1548,12 +1533,6 @@
           <caret line="384" column="34" selection-start-line="384" selection-start-column="34" selection-end-line="384" selection-end-column="34" />
           <folding>
             <element signature="imports" expanded="true" />
-            <element signature="e#2206#2222#0" expanded="true" />
-            <element signature="e#2304#2325#0" expanded="true" />
-            <element signature="e#2385#2400#0" expanded="true" />
-            <element signature="e#18176#18184#0" expanded="true" />
-            <element signature="e#18640#18648#0" expanded="true" />
-            <element signature="e#19286#19294#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -1580,12 +1559,6 @@
           <caret line="124" column="5" selection-start-line="124" selection-start-column="5" selection-end-line="124" selection-end-column="5" />
           <folding>
             <element signature="imports" expanded="true" />
-            <element signature="e#2206#2222#0" expanded="true" />
-            <element signature="e#2304#2325#0" expanded="true" />
-            <element signature="e#2385#2400#0" expanded="true" />
-            <element signature="e#18176#18184#0" expanded="true" />
-            <element signature="e#18640#18648#0" expanded="true" />
-            <element signature="e#19286#19294#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -1612,12 +1585,6 @@
           <caret line="377" column="17" selection-start-line="377" selection-start-column="17" selection-end-line="377" selection-end-column="17" />
           <folding>
             <element signature="imports" expanded="true" />
-            <element signature="e#2206#2222#0" expanded="true" />
-            <element signature="e#2304#2325#0" expanded="true" />
-            <element signature="e#2385#2400#0" expanded="true" />
-            <element signature="e#18176#18184#0" expanded="true" />
-            <element signature="e#18640#18648#0" expanded="true" />
-            <element signature="e#19286#19294#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -1644,12 +1611,6 @@
           <caret line="292" column="32" selection-start-line="292" selection-start-column="32" selection-end-line="292" selection-end-column="32" />
           <folding>
             <element signature="imports" expanded="true" />
-            <element signature="e#2206#2222#0" expanded="true" />
-            <element signature="e#2304#2325#0" expanded="true" />
-            <element signature="e#2385#2400#0" expanded="true" />
-            <element signature="e#18176#18184#0" expanded="true" />
-            <element signature="e#18640#18648#0" expanded="true" />
-            <element signature="e#19286#19294#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -1676,12 +1637,6 @@
           <caret line="292" column="32" selection-start-line="292" selection-start-column="32" selection-end-line="292" selection-end-column="32" />
           <folding>
             <element signature="imports" expanded="true" />
-            <element signature="e#2206#2222#0" expanded="true" />
-            <element signature="e#2304#2325#0" expanded="true" />
-            <element signature="e#2385#2400#0" expanded="true" />
-            <element signature="e#18176#18184#0" expanded="true" />
-            <element signature="e#18640#18648#0" expanded="true" />
-            <element signature="e#19286#19294#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -1708,12 +1663,6 @@
           <caret line="23" column="5" selection-start-line="23" selection-start-column="5" selection-end-line="23" selection-end-column="5" />
           <folding>
             <element signature="imports" expanded="true" />
-            <element signature="e#2206#2222#0" expanded="true" />
-            <element signature="e#2304#2325#0" expanded="true" />
-            <element signature="e#2385#2400#0" expanded="true" />
-            <element signature="e#18176#18184#0" expanded="true" />
-            <element signature="e#18640#18648#0" expanded="true" />
-            <element signature="e#19286#19294#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -1740,12 +1689,6 @@
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
             <element signature="imports" expanded="true" />
-            <element signature="e#2206#2222#0" expanded="true" />
-            <element signature="e#2304#2325#0" expanded="true" />
-            <element signature="e#2385#2400#0" expanded="true" />
-            <element signature="e#18176#18184#0" expanded="true" />
-            <element signature="e#18640#18648#0" expanded="true" />
-            <element signature="e#19286#19294#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -1772,12 +1715,6 @@
           <caret line="11" column="13" selection-start-line="11" selection-start-column="13" selection-end-line="11" selection-end-column="13" />
           <folding>
             <element signature="imports" expanded="true" />
-            <element signature="e#2206#2222#0" expanded="true" />
-            <element signature="e#2304#2325#0" expanded="true" />
-            <element signature="e#2385#2400#0" expanded="true" />
-            <element signature="e#18176#18184#0" expanded="true" />
-            <element signature="e#18640#18648#0" expanded="true" />
-            <element signature="e#19286#19294#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -1804,12 +1741,6 @@
           <caret line="11" column="13" selection-start-line="11" selection-start-column="13" selection-end-line="11" selection-end-column="13" />
           <folding>
             <element signature="imports" expanded="true" />
-            <element signature="e#2206#2222#0" expanded="true" />
-            <element signature="e#2304#2325#0" expanded="true" />
-            <element signature="e#2385#2400#0" expanded="true" />
-            <element signature="e#18176#18184#0" expanded="true" />
-            <element signature="e#18640#18648#0" expanded="true" />
-            <element signature="e#19286#19294#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -1836,12 +1767,6 @@
           <caret line="11" column="13" selection-start-line="11" selection-start-column="13" selection-end-line="11" selection-end-column="13" />
           <folding>
             <element signature="imports" expanded="true" />
-            <element signature="e#2206#2222#0" expanded="true" />
-            <element signature="e#2304#2325#0" expanded="true" />
-            <element signature="e#2385#2400#0" expanded="true" />
-            <element signature="e#18176#18184#0" expanded="true" />
-            <element signature="e#18640#18648#0" expanded="true" />
-            <element signature="e#19286#19294#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -1904,13 +1829,13 @@
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/app/src/main/res/layout/activity_simple_dynamo.xml">
+      <provider editor-type-id="android-designer">
+        <state />
+      </provider>
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.7366548" vertical-offset="414" max-vertical-offset="989">
           <caret line="36" column="30" selection-start-line="36" selection-start-column="30" selection-end-line="36" selection-end-column="30" />
         </state>
-      </provider>
-      <provider editor-type-id="android-designer">
-        <state />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/app/src/main/AndroidManifest.xml">
@@ -1918,16 +1843,6 @@
         <state vertical-scroll-proportion="0.45695364" vertical-offset="0" max-vertical-offset="851">
           <caret line="12" column="34" selection-start-line="12" selection-start-column="34" selection-end-line="12" selection-end-column="34" />
           <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/src/main/java/edu/buffalo/cse/cse486586/simpledynamo/OnTestClickListener.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="684" max-vertical-offset="2698">
-          <caret line="54" column="33" selection-start-line="54" selection-start-column="33" selection-end-line="54" selection-end-column="33" />
-          <folding>
-            <element signature="e#1818#1819#0" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -1947,18 +1862,22 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/app/src/main/java/edu/buffalo/cse/cse486586/simpledynamo/OnTestClickListener.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0" vertical-offset="684" max-vertical-offset="2698">
+          <caret line="54" column="33" selection-start-line="54" selection-start-column="33" selection-end-line="54" selection-end-column="33" />
+          <folding>
+            <element signature="e#1818#1819#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/app/src/main/java/edu/buffalo/cse/cse486586/simpledynamo/SimpleDynamoProvider.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="3.862963" vertical-offset="819" max-vertical-offset="23877">
-          <caret line="188" column="61" selection-start-line="188" selection-start-column="61" selection-end-line="188" selection-end-column="61" />
+        <state vertical-scroll-proportion="5.2181816" vertical-offset="3843" max-vertical-offset="24780">
+          <caret line="306" column="5" selection-start-line="306" selection-start-column="5" selection-end-line="306" selection-end-column="5" />
           <folding>
             <element signature="imports" expanded="true" />
-            <element signature="e#2206#2222#0" expanded="true" />
-            <element signature="e#2304#2325#0" expanded="true" />
-            <element signature="e#2385#2400#0" expanded="true" />
-            <element signature="e#18176#18184#0" expanded="true" />
-            <element signature="e#18640#18648#0" expanded="true" />
-            <element signature="e#19286#19294#0" expanded="true" />
           </folding>
         </state>
       </provider>
