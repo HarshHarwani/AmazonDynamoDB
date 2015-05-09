@@ -277,7 +277,7 @@ public class SimpleDynamoProvider extends ContentProvider {
                 Log.d(TAG, "Inside nodeIsUp Condition");
             }
             if(!fileExist("dummyRecord")){
-            insertRecord("dummyRecord","dummyValue");
+                insertRecord("dummyRecord","dummyValue");
             }
             String[] successors = getSuccessors(portStr);
             firstSuccesor = successors[0];
@@ -318,9 +318,9 @@ public class SimpleDynamoProvider extends ContentProvider {
         Log.d(TAG, "My firstPredecessor is-->" + firstPredecessor);
         Log.d(TAG, "My secondPredecessor is-->" + secondPredecessor);
         Log.d(TAG,"Vaue of syncFlag in syncRequest"+String.valueOf(syncFlag));
-       // for(String str:successors){
-            new ClientTask().executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, String.valueOf(Mode.SYNCSUCCESSORS),firstSuccessor);
-       // }
+        // for(String str:successors){
+        new ClientTask().executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, String.valueOf(Mode.SYNCSUCCESSORS),firstSuccessor);
+        // }
         for(String str1:predecessors){
             new ClientTask().executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, String.valueOf(Mode.SYNCPREDECESSORS),str1);
         }
@@ -409,6 +409,7 @@ public class SimpleDynamoProvider extends ContentProvider {
     public String getQueryStringSuccessor(String incomingPortNumber) {
         //In case of successor the incomingPortNumber will be of the node that has recovered.
         //In case of preDecessor the incomingPort will be of the node that will be of predecessor itself.
+        Log.d(TAG,"getQueryStringSuccessor called from servers");
         FileInputStream inputStream = null;
         MatrixCursor matrixCursor = null;
         BufferedReader bufferedReader = null;
@@ -521,38 +522,38 @@ public class SimpleDynamoProvider extends ContentProvider {
         Log.d("selectionQuery",selectionQuery);
         Log.d(TAG,"Value of syncFlag in query"+String.valueOf(syncFlag));
         while (syncFlag);
-            if ((!selectionQuery.equals("@") && !selectionQuery.equals("*"))) {
-                //queryWaitFlag = true;
-                for (String str : portNumbers) {
-                    String incomingPredecessor = getPredecessor(str);
-                    boolean flag = containsRequest(selectionQuery, str, incomingPredecessor);
-                    if (flag) {
-                        queryHolderPort = str;
-                        Log.d(TAG, "The port where key belongs is" + queryHolderPort);
-                        break;
-                    }
+        if ((!selectionQuery.equals("@") && !selectionQuery.equals("*"))) {
+            //queryWaitFlag = true;
+            for (String str : portNumbers) {
+                String incomingPredecessor = getPredecessor(str);
+                boolean flag = containsRequest(selectionQuery, str, incomingPredecessor);
+                if (flag) {
+                    queryHolderPort = str;
+                    Log.d(TAG, "The port where key belongs is" + queryHolderPort);
+                    break;
                 }
-                Log.d(TAG, "Map condition true for" + queryHolderPort + "$" + selectionQuery);
-                //To think whether to make a new map object everytime?
-                //Its the case where two concurrent operations take place at the same node for the same key.
-                waitMap.put(queryHolderPort + "$" + selectionQuery, true);
-                new ClientTask().executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, String.valueOf(Mode.QUERY), queryHolderPort, selectionQuery);
-                // Log.d(TAG, "queryWaitFlag before waiting" + String.valueOf(queryWaitFlag));
-                Log.d(TAG,"SYNCFLAG VALUE Before Waiting"+String.valueOf(syncFlag));
-                while ((waitMap.get(queryHolderPort + "$" + selectionQuery))) ;
-                Log.d(TAG,"SYNCFLAG VALUE After Waiting"+String.valueOf(syncFlag));
-                //  Log.d(TAG, "queryWaitFlag after waiting" + String.valueOf(queryWaitFlag));
-                Log.d(TAG, "FinalFetchedQuery in individual query" + finalFetchedQuery);
-                if (finalFetchedQuery != null && finalFetchedQuery != "") {
-                    Log.d(TAG, "Inside FinalFetchedQuery is not null");
-                    String key = finalFetchedQuery.split("%")[0];
-                    String value = finalFetchedQuery.split("%")[1];
-                    matrixCursor = new MatrixCursor(new String[]{"key", "value"});
-                    matrixCursor.newRow().add(key).add(value);
-                    return matrixCursor;
-                }
-
             }
+            Log.d(TAG, "Map condition true for" + queryHolderPort + "$" + selectionQuery);
+            //To think whether to make a new map object everytime?
+            //Its the case where two concurrent operations take place at the same node for the same key.
+            waitMap.put(queryHolderPort + "$" + selectionQuery, true);
+            new ClientTask().executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, String.valueOf(Mode.QUERY), queryHolderPort, selectionQuery);
+            // Log.d(TAG, "queryWaitFlag before waiting" + String.valueOf(queryWaitFlag));
+            Log.d(TAG,"SYNCFLAG VALUE Before Waiting"+String.valueOf(syncFlag));
+            while ((waitMap.get(queryHolderPort + "$" + selectionQuery))) ;
+            Log.d(TAG,"SYNCFLAG VALUE After Waiting"+String.valueOf(syncFlag));
+            //  Log.d(TAG, "queryWaitFlag after waiting" + String.valueOf(queryWaitFlag));
+            Log.d(TAG, "FinalFetchedQuery in individual query" + finalFetchedQuery);
+            if (finalFetchedQuery != null && finalFetchedQuery != "") {
+                Log.d(TAG, "Inside FinalFetchedQuery is not null");
+                String key = finalFetchedQuery.split("%")[0];
+                String value = finalFetchedQuery.split("%")[1];
+                matrixCursor = new MatrixCursor(new String[]{"key", "value"});
+                matrixCursor.newRow().add(key).add(value);
+                return matrixCursor;
+            }
+
+        }
         if (selectionQuery.equals("@")) {
             Log.d(TAG, "Inside Query @ method");
             matrixCursor = new MatrixCursor(new String[]{"key", "value"});
@@ -652,6 +653,7 @@ public class SimpleDynamoProvider extends ContentProvider {
                             e.printStackTrace();
                         }
                         Log.d(TAG, "Incoming String in Server-->" + strings);
+                        Log.d(TAG,"Value of syncFlag in Server"+String.valueOf(syncFlag));
                         String modeString = strings.split("~")[0];
                         Log.d(TAG, "Mode String in Server-->" + modeString);
                         Mode mode = Mode.valueOf(modeString);
